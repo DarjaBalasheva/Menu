@@ -1,4 +1,7 @@
+import uuid
+
 from fastapi import FastAPI, Request
+from sqlalchemy import true
 from sqlalchemy.orm import sessionmaker
 from starlette.responses import JSONResponse
 
@@ -39,12 +42,15 @@ async def create_menu(request: Request):
         menu_id = str(new_menu.id)
         menu_name = new_menu.name
         menu_description = new_menu.description
+        submenus_count = new_menu.submenus_count()
+        dishes_count = new_menu.dishes_count()
         session.close()
         return {
-            "message": "Меню успешно создано",
             "id": menu_id,
             "title": menu_name,
             "description": menu_description,
+            "submenus_count": submenus_count,
+            "dishes_count": dishes_count,
         }
     except Exception as e:
         return {"error": str(e)}
@@ -55,38 +61,36 @@ async def show_all_menu():
     Session = sessionmaker(bind=engine)
     session = Session()
     all_menus = session.query(Menu).all()
-    session.close()
     menu_list = [
-        {"id": str(menu.id), "title": menu.name, "description": menu.description}
+        {
+            "id": str(menu.id),
+            "title": menu.name,
+            "description": menu.description,
+            "submenus_count": menu.submenus_count(),
+            "dishes_count": menu.dishes_count(),
+        }
         for menu in all_menus
     ]
+    session.close()
     return menu_list
 
 
 @app.get("/api/v1/menus/{target_menu_id}")
-async def show_menu(target_menu_id: int):
+async def show_menu(target_menu_id: str):
     if target_menu_id is None:
         return JSONResponse(content={"detail": "ID меню не указан"}, status_code=422)
 
-    # Проверяем, является ли target_menu_id валидным целым числом
-    if not isinstance(target_menu_id, int):
-        return JSONResponse(
-            content={"detail": "Неверный формат ID меню"}, status_code=422
-        )
-
     Session = sessionmaker(bind=engine)
     session = Session()
+    target_menu_id = uuid.UUID(target_menu_id)
     menu = session.query(Menu).filter(Menu.id == target_menu_id).first()
 
     if menu:
         menu_id = str(menu.id)
         menu_name = menu.name
         menu_description = menu.description
-
-        # Получаем количество подменю и блюд для данного меню
-        submenus_count = len(menu.submenus)
-        dishes_count = sum(len(submenu.dishes) for submenu in menu.submenus)
-
+        submenus_count = menu.submenus_count()
+        dishes_count = menu.dishes_count()
         session.close()
         return {
             "id": menu_id,
@@ -97,20 +101,17 @@ async def show_menu(target_menu_id: int):
         }
 
     session.close()
-    id = str(target_menu_id)
     return JSONResponse(
         content={
             "detail": "menu not found",
-            "id": id,
-            "title": None,
-            "description": None,
         },
         status_code=404,
     )
 
 
 @app.patch("/api/v1/menus/{target_menu_id}")
-async def update_menu(request: Request, target_menu_id: int):
+async def update_menu(request: Request, target_menu_id: str):
+    target_menu_id = uuid.UUID(target_menu_id)
     data = await request.json()
 
     title = data.get("title")
@@ -132,23 +133,33 @@ async def update_menu(request: Request, target_menu_id: int):
                     menu.description = description
                 # Фиксируем изменения в базе данных
                 session.commit()
-                menu_id = menu.id
+                menu_id = str(menu.id)
                 menu_name = menu.name
                 menu_description = menu.description
+                submenus_count = menu.submenus_count()
+                dishes_count = menu.dishes_count()
+                session.close()
                 return {
-                    "message": f"Информация для меню с ID {target_menu_id} успешно обновлена",
                     "id": menu_id,
                     "title": menu_name,
                     "description": menu_description,
+                    "submenus_count": submenus_count,
+                    "dishes_count": dishes_count,
                 }
-            return {"message": f"Меню с ID {target_menu_id} не найдено"}
+            return JSONResponse(
+                content={
+                    "detail": "menu not found",
+                },
+                status_code=404,
+            )
     except Exception as e:
         error_msg = str(e)
         return {"error": error_msg}
 
 
 @app.delete("/api/v1/menus/{target_menu_id}")
-async def delete_menu(target_menu_id: int):
+async def delete_menu(target_menu_id: str):
+    target_menu_id = uuid.UUID(target_menu_id)
     try:
         # Создаем сессию для взаимодействия с базой данных
         Session = sessionmaker(bind=engine)
@@ -161,7 +172,7 @@ async def delete_menu(target_menu_id: int):
             # Фиксируем изменения в базе данных
             session.commit()
 
-        return {"message": f"Меню {target_menu_id} успешно удалено"}
+        return {"status": true, "message": "The menu has been deleted"}
     except Exception as e:
         error_msg = str(e)
         return {"error": error_msg}
@@ -192,7 +203,8 @@ async def delete_all_menus():
 
 # Добавление подменю в таблицу
 @app.post("/api/v1/menus/{target_menu_id}/submenus", status_code=201)
-async def create_submenu(request: Request, target_menu_id: int):
+async def create_submenu(request: Request, target_menu_id: str):
+    target_menu_id = uuid.UUID(target_menu_id)
     data = await request.json()
 
     title = data.get("title")
@@ -203,35 +215,41 @@ async def create_submenu(request: Request, target_menu_id: int):
         Session = sessionmaker(bind=engine)
         session = Session()
 
-        # Создаем новый объект меню
+        # Создаем новый объект подменю
         menu = session.query(Menu).filter(Menu.id == target_menu_id).first()
         if menu is None:
-            return {"error": f"Меню с ID {target_menu_id} не найдено"}
+            return JSONResponse(
+                content={
+                    "detail": "menu not found",
+                },
+                status_code=404,
+            )
 
-        # Добавляем новое меню в сессию
+        # Добавляем новое  подменю в сессию
         new_submenu = Submenu(
             name=title, description=description, menu_id=target_menu_id
         )
         session.add(new_submenu)
-        # Фиксируем изменения в базе данных
         session.commit()
         submenu_id = str(new_submenu.id)
         submenu_name = new_submenu.name
         submenu_description = new_submenu.description
-
+        dishes_count = new_submenu.dishes_count()
         session.close()
         return {
-            "message": "Подменю успешно создано",
             "id": submenu_id,
             "title": submenu_name,
             "description": submenu_description,
+            "dishes_count": dishes_count,
         }
-    except Exception:
-        return {"target_menu": target_menu_id}
+    except Exception as e:
+        error_msg = str(e)
+        return {"error": error_msg}
 
 
 @app.get("/api/v1/menus/{target_menu_id}/submenus")
-async def show_all_submenus(target_menu_id: int):
+async def show_all_submenus(target_menu_id: str):
+    target_menu_id = uuid.UUID(target_menu_id)
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -253,6 +271,7 @@ async def show_all_submenus(target_menu_id: int):
                 "id": str(submenu.id),
                 "title": submenu.name,
                 "description": submenu.description,
+                "dishes_count": submenu.dishes_count(),
             }
             for submenu in all_submenus
         ]
@@ -267,7 +286,9 @@ async def show_all_submenus(target_menu_id: int):
 
 
 @app.get("/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}")
-async def show_submenu(target_menu_id: int, target_submenu_id):
+async def show_submenu(target_menu_id: str, target_submenu_id: str):
+    target_menu_id = uuid.UUID(target_menu_id)
+    target_submenu_id = uuid.UUID(target_submenu_id)
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -284,9 +305,7 @@ async def show_submenu(target_menu_id: int, target_submenu_id):
                 submenu_id = str(submenu.id)
                 submenu_name = submenu.name
                 submenu_description = submenu.description
-
-                # Получаем количество блюд для данного подменю
-                dishes_count = len(submenu.dishes)
+                dishes_count = submenu.dishes_count()
 
                 session.close()
                 return {
@@ -299,13 +318,7 @@ async def show_submenu(target_menu_id: int, target_submenu_id):
         # If submenu is not found, return a 404 response
         session.close()
         return JSONResponse(
-            content={
-                "detail": "submenu not found",
-                "id": None,
-                "title": None,
-                "description": None,
-                "dishes_count": None,
-            },
+            content={"detail": "submenu not found"},
             status_code=404,
         )
 
@@ -316,7 +329,8 @@ async def show_submenu(target_menu_id: int, target_submenu_id):
 
 
 @app.patch("/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}")
-async def update_submenu(request: Request, target_submenu_id: int):
+async def update_submenu(request: Request, target_submenu_id: str):
+    target_submenu_id = uuid.UUID(target_submenu_id)
     data = await request.json()
 
     title = data.get("title")
@@ -343,20 +357,26 @@ async def update_submenu(request: Request, target_submenu_id: int):
                 submenu_id = submenu.id
                 submenu_name = submenu.name
                 submenu_description = submenu.description
+                dishes_count = submenu.dishes_count()
                 return {
                     "message": f"Информация для подменю с ID {target_submenu_id} успешно обновлена",
                     "id": submenu_id,
                     "title": submenu_name,
                     "description": submenu_description,
+                    "dishes_count": dishes_count,
                 }
-            return {"message": f"Подменю с ID {target_submenu_id} не найдено"}
+            return JSONResponse(
+                content={"detail": "submenu not found"},
+                status_code=404,
+            )
     except Exception as e:
         error_msg = str(e)
         return {"error": error_msg}
 
 
 @app.delete("/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}")
-async def delete_submenu(target_submenu_id: int):
+async def delete_submenu(target_submenu_id: str):
+    target_submenu_id = uuid.UUID(target_submenu_id)
     try:
         # Создаем сессию для взаимодействия с базой данных
         Session = sessionmaker(bind=engine)
@@ -369,7 +389,7 @@ async def delete_submenu(target_submenu_id: int):
             session.delete(submenu)
             # Фиксируем изменения в базе данных
             session.commit()
-        return {"message": "Подменю успешно удалено из базы данных"}
+        return {"status": true, "message": "The submenu has been deleted"}
     except Exception as e:
         error_msg = str(e)
         return {"error": error_msg}
@@ -379,7 +399,9 @@ async def delete_submenu(target_submenu_id: int):
     "/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes",
     status_code=201,
 )
-async def create_dish(request: Request, target_menu_id: int, target_submenu_id: int):
+async def create_dish(request: Request, target_menu_id: str, target_submenu_id: str):
+    target_submenu_id = uuid.UUID(target_submenu_id)
+    target_menu_id = uuid.UUID(target_menu_id)
     data = await request.json()
 
     name = data.get("title")
@@ -421,7 +443,6 @@ async def create_dish(request: Request, target_menu_id: int, target_submenu_id: 
             session.close()
 
         return {
-            "message": "Блюдо успешно добавлено в подменю",
             "title": dish_name,
             "description": dish_description,
             "id": dish_id,
@@ -433,7 +454,9 @@ async def create_dish(request: Request, target_menu_id: int, target_submenu_id: 
 
 
 @app.get("/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes")
-async def show_all_dishes(target_menu_id: int, target_submenu_id):
+async def show_all_dishes(target_menu_id: str, target_submenu_id: str):
+    target_menu_id = uuid.UUID(target_menu_id)
+    target_submenu_id = uuid.UUID(target_submenu_id)
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -478,7 +501,10 @@ async def show_all_dishes(target_menu_id: int, target_submenu_id):
 @app.get(
     "/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}"
 )
-async def show_dish(target_menu_id: int, target_submenu_id, target_dish_id: int):
+async def show_dish(target_menu_id: str, target_submenu_id, target_dish_id: str):
+    target_menu_id = uuid.UUID(target_menu_id)
+    target_submenu_id = uuid.UUID(target_submenu_id)
+    target_dish_id = uuid.UUID(target_dish_id)
     try:
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -489,13 +515,7 @@ async def show_dish(target_menu_id: int, target_submenu_id, target_dish_id: int)
         if menu is None:
             session.close()
             return JSONResponse(
-                content={
-                    "detail": "dish not found",
-                    "id": None,
-                    "title": None,
-                    "description": None,
-                    "price": None,
-                },
+                content={"detail": "dish not found"},
                 status_code=404,
             )
 
@@ -509,13 +529,7 @@ async def show_dish(target_menu_id: int, target_submenu_id, target_dish_id: int)
         if submenu is None:
             session.close()
             return JSONResponse(
-                content={
-                    "detail": "dish not found",
-                    "id": None,
-                    "title": None,
-                    "description": None,
-                    "price": None,
-                },
+                content={"detail": "dish not found"},
                 status_code=404,
             )
 
@@ -540,7 +554,7 @@ async def show_dish(target_menu_id: int, target_submenu_id, target_dish_id: int)
 
         session.close()
         return JSONResponse(
-            content={"detail": "dish not found", "id": None, "description": None},
+            content={"detail": "dish not found"},
             status_code=404,
         )
 
@@ -553,13 +567,14 @@ async def show_dish(target_menu_id: int, target_submenu_id, target_dish_id: int)
 @app.patch(
     "/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}"
 )
-async def update_dish(request: Request, target_submenu_id: int, target_dish_id: int):
+async def update_dish(request: Request, target_submenu_id: str, target_dish_id: str):
     data = await request.json()
 
     title = data.get("title")
     description = data.get("description")
     price = data.get("price")
-
+    target_submenu_id = uuid.UUID(target_submenu_id)
+    target_dish_id = uuid.UUID(target_dish_id)
     try:
         # Создаем сессию для взаимодействия с базой данных
         Session = sessionmaker(bind=engine)
@@ -584,14 +599,16 @@ async def update_dish(request: Request, target_submenu_id: int, target_dish_id: 
                 dish_price = str(dish.price)
                 session.close()
                 return {
-                    "message": f"Информация для блюда с ID {target_submenu_id} успешно обновлена",
                     "id": dish_id,
                     "title": dish_name,
                     "description": dish_description,
                     "price": dish_price,
                 }
             session.close()
-            return {"message": f"Блюдо с ID {target_submenu_id} не найдено"}
+            return JSONResponse(
+                content={"detail": "dish not found"},
+                status_code=404,
+            )
     except Exception as e:
         error_msg = str(e)
         session.close()
@@ -601,7 +618,8 @@ async def update_dish(request: Request, target_submenu_id: int, target_dish_id: 
 @app.delete(
     "/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}"
 )
-async def delete_dish(target_dish_id: int):
+async def delete_dish(target_dish_id: str):
+    target_dish_id = uuid.UUID(target_dish_id)
     try:
         # Создаем сессию для взаимодействия с базой данных
         Session = sessionmaker(bind=engine)
@@ -612,7 +630,7 @@ async def delete_dish(target_dish_id: int):
             session.delete(dish)
             # Фиксируем изменения в базе данных
             session.commit()
-        return {"message": "Блюдо успешно удалено из базы данных"}
+        return {"status": true, "message": "The dish has been deleted"}
     except Exception as e:
         error_msg = str(e)
         return {"error": error_msg}
