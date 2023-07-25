@@ -15,7 +15,7 @@
 ## Установка на mac os
 - [Установка Python](https://www.python.org/downloads/macos/)
 - [Установка Docker](https://www.docker.com/get-started/)
-- Установите Git, если он ещё не установлен с помощью Homebrew.
+- Установите Git  и PostgreSQL, если они ещё не установлены с помощью Homebrew.
   - Установка Homebrew
     ```bash
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -32,11 +32,10 @@
     ```bash
     brew install postgresql
     ```
-  - Установка библиотеки зависимостей
-  ```bash
-  pip pipenv install
-  ```
-
+- Установка библиотеки зависимостей
+```bash
+pip pipenv install
+```
 
 
 ## Настройка
