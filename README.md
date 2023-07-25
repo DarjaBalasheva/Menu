@@ -32,20 +32,27 @@
     ```bash
     brew install postgresql
     ```
+  - Установка библиотеки зависимостей
+  ```bash
+  pip pipenv install
+  ```
+
+
+
+## Настройка
 - Клонирование репозитория.
 ```bash
 git clone git@github.com:DarjaBalasheva/Menu.git
 cd Menu
 ```
-
-- Установка библиотеки зависимостей
-```bash
-pip pipenv install
-```
-## Настройка
 ### Настройка env файла
 Перед запуском проекта необходимо настроить переменные окружения.
 Переименуйте файл .env.example в .env
+
+- Установка зависимостей pipenv
+```bash
+pipenv install
+```
 
 - Активация виртуального окружение pipenv
 ```bash
@@ -55,11 +62,15 @@ pipenv shell
 ## Запуск проекта
 Запустите Docker-контейнеры с помощью docker-compose. Это моет занять некоторе время. Дождитесь, пока в консоле не появится соотвествующая информация о готовности работы БД.
 ```bash
-docker-compose up 
+docker-compose up -d
+```
+или
+```bash
+docker-compose up -d
 ```
 Запустите скрипт создания БД
 ```bash
-python3  db_create.py
+python3 db_create.py
 ```
 Запустите FastAPI
 ```bash
