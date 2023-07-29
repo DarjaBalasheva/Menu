@@ -4,21 +4,31 @@ version: '3.1'
 services:
 
   db:
-    image: postgres
+    image: postgres:15.1-alpine
     container_name: mydb
     # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
     # (this is just an example, not intended to be a production configuration)
     restart: always
-    environment:
-      - POSTGRES_USER=${db_user_login}
-      - POSTGRES_PASSWORD=${db_user_password}
-      - POSTGRES_DB=${db_name}
+    env_file:
+      - .env
     ports:
       # <Port exposed> : < MySQL Port running inside container>
       - '5432:5432'
     expose:
       # Opens port 3306 on the container
       - '5432'
+  api:
+    build:
+      context: .
+    container_name: fastapi_api
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    command: ["/app/docker/app.sh"]
+    ports:
+      - '8000:8000'
 
 volumes:
   db_data:

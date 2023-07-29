@@ -18,9 +18,10 @@ load_dotenv()
 USERNAME = os.environ.get("db_user_login")
 PASSWORD = os.environ.get("db_user_password")
 DBNAME = os.environ.get("db_name")
+HOST = os.environ.get("db_host")
 
 engine = create_engine(
-    f"postgresql://{USERNAME}:{PASSWORD}@localhost/{DBNAME}", echo=True
+    f"postgresql://{USERNAME}:{PASSWORD}@{HOST}/{DBNAME}", echo=True
 )
 
 Base = declarative_base()
