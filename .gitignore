@@ -5,3 +5,5 @@ node_modules/
 .env
 .cache
 .idea/
+tests/.pytest_cache
+.pytest_cache

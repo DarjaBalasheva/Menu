@@ -1,13 +1,8 @@
-import uuid
-
-from fastapi import FastAPI, Request
-from sqlalchemy import true
-from sqlalchemy.orm import sessionmaker
-from starlette.responses import JSONResponse
+from fastapi import FastAPI
 from routers.menus import router as menus
 from routers.submenus import router as submenus
 from routers.dishes import router as dishes
-from db_create import engine, Base, Menu, Submenu, Dish
+from db_create import engine, Base
 import db_connect
 
 # Создаем таблицы базы данных
@@ -25,6 +20,3 @@ async def root():
 app.include_router(menus)
 app.include_router(submenus)
 app.include_router(dishes)
-
-
-

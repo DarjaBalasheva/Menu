@@ -10,25 +10,36 @@ services:
     # (this is just an example, not intended to be a production configuration)
     restart: always
     env_file:
-      - .env
+      - .env.deploy
     ports:
       # <Port exposed> : < MySQL Port running inside container>
       - '5432:5432'
     expose:
       # Opens port 3306 on the container
       - '5432'
-  api:
+  api_server:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: fastapi_api
     restart: always
     depends_on:
       - db
     env_file:
-      - .env
-    command: ["/app/docker/app.sh"]
+      - .env.deploy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - '8000:8000'
+
+  tests15:
+    build:
+      context: .
+      dockerfile: Dockerfile.tests
+    depends_on:
+      - api_server
+    env_file:
+      - .env.deploy
+    command: python -m pytest tests/
 
 volumes:
   db_data:

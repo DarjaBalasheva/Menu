@@ -13,8 +13,12 @@ autoflake = "*"
 pre-commit = "*"
 python-dotenv = "*"
 sqlalchemy = "*"
-alembic="*"
 psycopg2 = "*"
+
+pytest="*"
+httpx="*"
+requests="*"
+pytest-asyncio = "*"
 
 [dev-packages]
 

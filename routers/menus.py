@@ -1,15 +1,18 @@
 import uuid
 
-from fastapi import FastAPI, Request, APIRouter
+from fastapi import Request, APIRouter
 from sqlalchemy import true
 from sqlalchemy.orm import sessionmaker
 from starlette.responses import JSONResponse
 
-from db_create import engine, Base, Menu, Submenu, Dish
+from db_create import engine, Menu, Submenu
 import db_connect
+
 
 router = APIRouter()
 connection = db_connect.connect()
+
+
 
 # Добавление меню в таблицу
 @router.post("/api/v1/menus", status_code=201)
@@ -107,7 +110,6 @@ async def show_menu(target_menu_id: str):
 async def update_menu(request: Request, target_menu_id: str):
     target_menu_id = uuid.UUID(target_menu_id)
     data = await request.json()
-
     title = data.get("title")
     description = data.get("description")
 
@@ -133,6 +135,7 @@ async def update_menu(request: Request, target_menu_id: str):
                 submenus_count = menu.submenus_count()
                 dishes_count = menu.dishes_count()
                 session.close()
+
                 return {
                     "id": menu_id,
                     "title": menu_name,
