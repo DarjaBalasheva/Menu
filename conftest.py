@@ -1,30 +1,11 @@
 import pytest
 import httpx
-import uuid
-
 import pytest_asyncio
-
-from db_create import engine, Menu, Base
 
 BASE_URL = "http://api_server:8000/api/v1/menus"
 
-import pytest_asyncio
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.dialects.postgresql import UUID
-from dotenv import load_dotenv
-import os
 
-# Load environment variables from .env
-# load_dotenv()
-#
-# USERNAME = os.environ.get("db_user_login")
-# PASSWORD = os.environ.get("db_user_password")
-# DBNAME = os.environ.get("db_name")
-# HOST = os.environ.get("db_host")  # Use the container hostname
-#
-# # Create the engine using the container hostname
 # TEST_DB_URL = create_engine(f"postgresql://{USERNAME}:{PASSWORD}@{HOST}/{DBNAME}", echo=True)
 # Фикстура для создания httpx.AsyncClient
 @pytest_asyncio.fixture
@@ -61,5 +42,3 @@ async def created_submenu(api_client, created_menu_id):
     data = response.json()
     submenu_id = data["id"]
     return submenu_id
-
-from sqlalchemy.orm import Session

@@ -1,14 +1,16 @@
 from fastapi import FastAPI
-from routers.menus import router as menus
-from routers.submenus import router as submenus
-from routers.dishes import router as dishes
-from db_create import engine, Base
-import db_connect
+from api.routers.menus import router as menus
+from api.routers.submenus import router as submenus
+from api.routers.dishes import router as dishes
+from api.db.db_create import engine, Base
+from api.db import db_connect
 
 # Создаем таблицы базы данных
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# Подлючение к БД
 connection = db_connect.connect()
 
 

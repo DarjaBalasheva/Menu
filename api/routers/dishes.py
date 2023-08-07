@@ -5,10 +5,12 @@ from sqlalchemy import true
 from sqlalchemy.orm import sessionmaker
 from starlette.responses import JSONResponse
 
-from db_create import engine, Menu, Submenu, Dish
-import db_connect
+from ..db.db_create import engine, Menu, Submenu, Dish
+from ..db import db_connect
 
 router = APIRouter()
+
+# Подключение к БД
 connection = db_connect.connect()
 
 

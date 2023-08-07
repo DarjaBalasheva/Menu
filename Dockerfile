@@ -14,11 +14,16 @@ RUN apt-get update && apt-get install -y build-essential
 # Установка pipenv
 RUN pip install pipenv
 
-# Копирование кода приложения
-COPY . .
+# Копирование Pipfile и Pipfile.lock
+COPY Pipfile Pipfile.lock ./
 
 # Установка зависимостей с помощью pipenv
-RUN pipenv lock && pipenv install --system --deploy
+RUN pipenv install --system --deploy
+
+# Копирование остального кода приложения
+COPY . .
+
+#WORKDIR /api
 
 #RUN chmod a+x docker/*.sh
 # Запуск приложения FastAPI

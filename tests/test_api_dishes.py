@@ -75,6 +75,7 @@ async def test_show_dish(api_client, created_menu_id, created_submenu):
     assert data["title"] == SAMPLE_DISHES["title"]
     assert data["description"] == SAMPLE_DISHES["description"]
 
+
 # Тест на обновление блюда
 @pytest.mark.asyncio
 async def test_update_dish(api_client, created_menu_id, created_submenu):
