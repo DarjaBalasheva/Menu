@@ -1,11 +1,12 @@
 import uuid
 
-from fastapi import Request, APIRouter
+from fastapi import APIRouter, Request
 from sqlalchemy import true
 from sqlalchemy.orm import sessionmaker
 from starlette.responses import JSONResponse
 
-from ..db.db_create import engine, Menu, Submenu, Dish
+from api.db.db_create import Dish, Menu, Submenu, engine
+
 from ..db import db_connect
 
 router = APIRouter()
@@ -15,7 +16,7 @@ connection = db_connect.connect()
 
 
 @router.post(
-    "/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes",
+    '/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes',
     status_code=201,
 )
 async def create_dish(request: Request, target_menu_id: str, target_submenu_id: str):
@@ -23,9 +24,9 @@ async def create_dish(request: Request, target_menu_id: str, target_submenu_id: 
     target_menu_id = uuid.UUID(target_menu_id)
     data = await request.json()
 
-    name = data.get("title")
-    description = data.get("description")
-    price = data.get("price")
+    name = data.get('title')
+    description = data.get('description')
+    price = data.get('price')
 
     try:
         Session = sessionmaker(bind=engine)
@@ -33,7 +34,7 @@ async def create_dish(request: Request, target_menu_id: str, target_submenu_id: 
         with Session() as session:
             menu = session.query(Menu).filter(Menu.id == target_menu_id).first()
             if menu is None:
-                return {"error": f"Меню с ID {target_menu_id} не найдено"}
+                return {'error': f'Меню с ID {target_menu_id} не найдено'}
 
             submenu = (
                 session.query(Submenu)
@@ -43,7 +44,7 @@ async def create_dish(request: Request, target_menu_id: str, target_submenu_id: 
                 .first()
             )
             if submenu is None:
-                return {"error": f"Подменю с ID {target_submenu_id} не найдено"}
+                return {'error': f'Подменю с ID {target_submenu_id} не найдено'}
 
             new_dish = Dish(
                 name=name,
@@ -62,17 +63,17 @@ async def create_dish(request: Request, target_menu_id: str, target_submenu_id: 
             session.close()
 
         return {
-            "title": dish_name,
-            "description": dish_description,
-            "id": dish_id,
-            "price": dish_price,
+            'title': dish_name,
+            'description': dish_description,
+            'id': dish_id,
+            'price': dish_price,
         }
     except Exception as e:
         error_msg = str(e)
-        return {"error": error_msg}
+        return {'error': error_msg}
 
 
-@router.get("/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes")
+@router.get('/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes')
 async def show_all_dishes(target_menu_id: str, target_submenu_id: str):
     target_menu_id = uuid.UUID(target_menu_id)
     target_submenu_id = uuid.UUID(target_submenu_id)
@@ -100,10 +101,10 @@ async def show_all_dishes(target_menu_id: str, target_submenu_id: str):
         # Создаем список словарей с информацией о каждом подменю
         dishes_list = [
             {
-                "id": str(dishes.id),
-                "title": dishes.name,
-                "description": dishes.description,
-                "price": str(dishes.price),
+                'id': str(dishes.id),
+                'title': dishes.name,
+                'description': dishes.description,
+                'price': str(dishes.price),
             }
             for dishes in all_dishes
         ]
@@ -114,11 +115,11 @@ async def show_all_dishes(target_menu_id: str, target_submenu_id: str):
     except Exception as e:
         error_msg = str(e)
         session.close()
-        return {"error": error_msg}
+        return {'error': error_msg}
 
 
 @router.get(
-    "/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}"
+    '/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}'
 )
 async def show_dish(target_menu_id: str, target_submenu_id, target_dish_id: str):
     target_menu_id = uuid.UUID(target_menu_id)
@@ -134,7 +135,7 @@ async def show_dish(target_menu_id: str, target_submenu_id, target_dish_id: str)
         if menu is None:
             session.close()
             return JSONResponse(
-                content={"detail": "dish not found"},
+                content={'detail': 'dish not found'},
                 status_code=404,
             )
 
@@ -148,7 +149,7 @@ async def show_dish(target_menu_id: str, target_submenu_id, target_dish_id: str)
         if submenu is None:
             session.close()
             return JSONResponse(
-                content={"detail": "dish not found"},
+                content={'detail': 'dish not found'},
                 status_code=404,
             )
 
@@ -165,33 +166,33 @@ async def show_dish(target_menu_id: str, target_submenu_id, target_dish_id: str)
             dish_price = str(dish.price)
             session.close()
             return {
-                "id": dish_id,
-                "description": dish_description,
-                "price": dish_price,
-                "title": dish_name,
+                'id': dish_id,
+                'description': dish_description,
+                'price': dish_price,
+                'title': dish_name,
             }
 
         session.close()
         return JSONResponse(
-            content={"detail": "dish not found"},
+            content={'detail': 'dish not found'},
             status_code=404,
         )
 
     except Exception as e:
         error_msg = str(e)
         session.close()
-        return {"error": error_msg}
+        return {'error': error_msg}
 
 
 @router.patch(
-    "/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}"
+    '/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}'
 )
 async def update_dish(request: Request, target_submenu_id: str, target_dish_id: str):
     data = await request.json()
 
-    title = data.get("title")
-    description = data.get("description")
-    price = data.get("price")
+    title = data.get('title')
+    description = data.get('description')
+    price = data.get('price')
     target_submenu_id = uuid.UUID(target_submenu_id)
     target_dish_id = uuid.UUID(target_dish_id)
     try:
@@ -218,24 +219,24 @@ async def update_dish(request: Request, target_submenu_id: str, target_dish_id: 
                 dish_price = str(dish.price)
                 session.close()
                 return {
-                    "id": dish_id,
-                    "title": dish_name,
-                    "description": dish_description,
-                    "price": dish_price,
+                    'id': dish_id,
+                    'title': dish_name,
+                    'description': dish_description,
+                    'price': dish_price,
                 }
             session.close()
             return JSONResponse(
-                content={"detail": "dish not found"},
+                content={'detail': 'dish not found'},
                 status_code=404,
             )
     except Exception as e:
         error_msg = str(e)
         session.close()
-        return {"error": error_msg}
+        return {'error': error_msg}
 
 
 @router.delete(
-    "/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}"
+    '/api/v1/menus/{target_menu_id}/submenus/{target_submenu_id}/dishes/{target_dish_id}'
 )
 async def delete_dish(target_dish_id: str):
     target_dish_id = uuid.UUID(target_dish_id)
@@ -249,7 +250,7 @@ async def delete_dish(target_dish_id: str):
             session.delete(dish)
             # Фиксируем изменения в базе данных
             session.commit()
-        return {"status": true, "message": "The dish has been deleted"}
+        return {'status': true, 'message': 'The dish has been deleted'}
     except Exception as e:
         error_msg = str(e)
-        return {"error": error_msg}
+        return {'error': error_msg}

@@ -23,7 +23,7 @@
   - Установка GIT
     ```bash
     brew install git
-    
+
   - Установка репозиторий homebrew/core, который содержит PostgreSQL
     ```bash
     brew tap homebrew/core
@@ -70,4 +70,3 @@ docker-compose up tests15
 
 ## Лицензия
 Этот проект лицензирован по лицензии MIT.
- 

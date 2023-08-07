@@ -1,9 +1,10 @@
 from fastapi import FastAPI
+
+from api.db import db_connect
+from api.db.db_create import Base, engine
+from api.routers.dishes import router as dishes
 from api.routers.menus import router as menus
 from api.routers.submenus import router as submenus
-from api.routers.dishes import router as dishes
-from api.db.db_create import engine, Base
-from api.db import db_connect
 
 # Создаем таблицы базы данных
 Base.metadata.create_all(bind=engine)
@@ -14,9 +15,9 @@ app = FastAPI()
 connection = db_connect.connect()
 
 
-@app.get("/")
+@app.get('/')
 async def root():
-    return {"message": "Hello World"}
+    return {'message': 'Hello World'}
 
 
 app.include_router(menus)
