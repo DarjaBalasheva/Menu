@@ -43,8 +43,8 @@ def show_menu_by_id(session: Session, target_menu_id: str) -> list[dict[str, str
             'submenus_count': menu.submenus_count(),
             'dishes_count': menu.dishes_count(),
         }
-    else:
-        return JSONResponse(content={'detail': 'menu not found'}, status_code=404)
+    # else:
+    #     return JSONResponse(content={'detail': 'menu not found'}, status_code=404)
 
 
 def update_menu_by_id(

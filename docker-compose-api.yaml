@@ -17,19 +17,19 @@ services:
     expose:
       # Opens port 3306 on the container
       - '5432'
-#  api_server:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    container_name: fastapi_api
-#    restart: always
-#    depends_on:
-#      - db
-#    env_file:
-#      - .env.deploy
-#    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-#    ports:
-#      - '8000:8000'
+  api_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_api
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env.deploy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - '8000:8000'
 
 volumes:
   db_data:

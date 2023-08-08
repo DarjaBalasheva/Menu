@@ -49,8 +49,11 @@ async def show_menu_handler(target_menu_id: str):
 
     try:
         menu = menus_servises.show_menu_by_id(session, target_menu_id)
+        if menu:
+            session.close()
+            return menu
         session.close()
-        return menu
+        return JSONResponse(content={'detail': 'menu not found'}, status_code=404)
 
     except Exception as e:
         session.close()
