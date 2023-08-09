@@ -1,19 +1,27 @@
 from fastapi import APIRouter, Request
+from fastapi_cache.decorator import cache
 from sqlalchemy.orm import sessionmaker
 from starlette.responses import JSONResponse
 
 from api.db.db_create import engine
 
 from ..db import db_connect
+from ..db.redis_connect import connect_to_redis
 from ..servises import menus_servises
 
 router = APIRouter()
 connection = db_connect.connect()
 
+# Создание подключения к Redis
+redis_client = connect_to_redis()
 
 # Добавление меню в таблицу
+
+
 @router.post('/api/v1/menus', status_code=201)
 async def create_menu_handler(request: Request):
+    # Очистка всего кэша
+    redis_client.flushall()
     data = await request.json()
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -27,6 +35,7 @@ async def create_menu_handler(request: Request):
 
 
 @router.get('/api/v1/menus')
+@cache(expire=60)
 async def show_all_menu_handler():
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -40,6 +49,7 @@ async def show_all_menu_handler():
 
 
 @router.get('/api/v1/menus/{target_menu_id}')
+@cache(expire=60)
 async def show_menu_handler(target_menu_id: str):
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -62,6 +72,8 @@ async def show_menu_handler(target_menu_id: str):
 
 @router.patch('/api/v1/menus/{target_menu_id}')
 async def update_menu_handler(request: Request, target_menu_id: str):
+    # Очистка всего кэша
+    redis_client.flushall()
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -78,6 +90,8 @@ async def update_menu_handler(request: Request, target_menu_id: str):
 
 @router.delete('/api/v1/menus/{target_menu_id}')
 async def delete_menu_handler(target_menu_id: str):
+    # Очистка всего кэша
+    redis_client.flushall()
     Session = sessionmaker(bind=engine)
     session = Session()
     try:
@@ -92,6 +106,8 @@ async def delete_menu_handler(target_menu_id: str):
 
 @router.delete('/api/v1/menus')
 async def delete_all_menus_handler():
+    # Очистка всего кэша
+    redis_client.flushall()
     Session = sessionmaker(bind=engine)
     session = Session()
     try:

@@ -33,21 +33,21 @@ def get_submenu_by_id(
         .filter_by(id=target_submenu_id, menu_id=target_menu_id)
         .first()
     )
+    print(submenu)
 
     return submenu
 
 
 def update_submenu_by_id_in_bd(
-    session: Session, submenu: Submenu, data: dict[str, str]
-) -> Menu:
-    title = data.get('title')
-    description = data.get('description')
+    session: Session, submenu: Submenu, title: str, description: str
+) -> Submenu:
 
     if title:
         submenu.name = title
     if description:
         submenu.description = description
     session.commit()
+
     return submenu
 
 

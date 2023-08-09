@@ -17,6 +17,13 @@ services:
     expose:
       # Opens port 3306 on the container
       - '5432'
+  redis:
+    image: "redis:latest"
+    container_name: redis_server
+    restart: always
+    ports:
+      - "6379:6379"
+
   api_server:
     build:
       context: .

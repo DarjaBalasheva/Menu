@@ -11,6 +11,9 @@ RUN apt update && apt install -y gnupg2 && apt-key adv --keyserver keyserver.ubu
 # Установка зависимостей для компиляции пакетов
 RUN apt-get update && apt-get install -y build-essential
 
+#Установка пакета FastapiCache
+RUN pip install "fastapi-cache2[redis]"
+
 # Установка pipenv
 RUN pip install pipenv
 

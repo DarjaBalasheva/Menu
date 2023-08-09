@@ -75,6 +75,10 @@ def show_submenu_by_id(
 def update_submenu_by_id(
     session: Session, target_menu_id: str, target_submenu_id: str, data: dict[str, str]
 ) -> dict[str, str]:
+
+    title = data.get('title')
+    description = data.get('description')
+
     menu = menus_servises.check_menu(session, target_menu_id)
 
     if menu:
@@ -84,7 +88,7 @@ def update_submenu_by_id(
 
         if submenu:
             update_submenu = submenus_repository.update_submenu_by_id_in_bd(
-                session, submenu, data
+                session, submenu, title, description
             )
 
             return {
@@ -110,7 +114,7 @@ def delete_submenu_by_id(
         )
         if submenu:
             submenus_repository.delete_submenu_by_id_in_bd(session, submenu)
-            return {'status': True, 'message': 'All submenus have been deleted'}
+            return {'status': True, 'message': 'The submenu has been deleted'}
 
         else:
             return JSONResponse(
@@ -118,3 +122,11 @@ def delete_submenu_by_id(
             )
 
     return not_menu
+
+
+def check_submenu(session: Session, target_menu_id: str, target_submenu_id: str) -> list[dict[str, str]]:
+    submenu = submenus_repository.get_submenu_by_id(session, target_menu_id, target_submenu_id)
+    if submenu:
+        return submenu
+    else:
+        return None

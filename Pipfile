@@ -15,11 +15,15 @@ pre-commit = "*"
 python-dotenv = "*"
 sqlalchemy = "*"
 psycopg2 = "*"
+redis = "*"
+fastapi-cache2 = "*"
+
 
 pytest="*"
 httpx="*"
 requests="*"
 pytest-asyncio = "*"
+
 
 [dev-packages]
 

@@ -72,7 +72,7 @@ def delete_menu_by_id(session: Session, target_menu_id: str) -> list[dict[str, s
     menu = menus_repository.get_menu_by_id(session, target_menu_id)
     if menu:
         menus_repository.delete_menu_by_id_in_bd(session, menu)
-        return {'status': True, 'message': 'All menus have been deleted'}
+        return {'status': True, 'message': 'The menu has been deleted'}
     else:
         return JSONResponse(content={'detail': 'menu not found'}, status_code=404)
 
