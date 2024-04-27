@@ -1,4 +1,4 @@
-# Проект на FastAPI с использованием PostgreSQL в качестве БД
+# FastAPI pet project
 <img src="https://github.com/DarjaBalasheva/fullstack-ivkhk/actions/workflows/my_workflow.yml/badge.svg">
 
 Pet project was developed on YLab_University course.
