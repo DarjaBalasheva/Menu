@@ -1,10 +1,10 @@
 # Проект на FastAPI с использованием PostgreSQL в качестве БД
 <img src="https://github.com/DarjaBalasheva/fullstack-ivkhk/actions/workflows/my_workflow.yml/badge.svg">
 
-Этот проект является учебным в рамках прохождения курсов в YLab_University.
+Pet project in YLab_University course.
 
 
-## Требования
+## Requirements
 - Git
 - Docker
 - Docker-compose
@@ -12,61 +12,60 @@
 - Pipenv
 - PostgreSQL
 
-## Установка на mac os
-- [Установка Python](https://www.python.org/downloads/macos/)
-- [Установка Docker](https://www.docker.com/get-started/)
-- Установите Git  и PostgreSQL, если они ещё не установлены с помощью Homebrew.
-  - Установка Homebrew
+## Installing on mac os
+- [Installing Python](https://www.python.org/downloads/macos/)
+- [Installing Docker](https://www.docker.com/get-started/)
+- Install Git and PostgreSQL with Homebrew.
+  - Installing Homebrew
     ```bash
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     ```
-  - Установка GIT
+  - Installing GIT
     ```bash
     brew install git
 
-  - Установка репозиторий homebrew/core, который содержит PostgreSQL
+  - Installing  homebrew/core with PostgreSQL
     ```bash
     brew tap homebrew/core
     ```
-  - Установка PostgreSQL
+  - Installing PostgreSQL
     ```bash
     brew install postgresql
     ```
-- Установка библиотеки зависимостей
+- Installing libraries
 ```bash
 pip pipenv install
 ```
 
 
-## Настройка
-- Клонирование репозитория.
+## Setting
+- Cloning repository.
 
 ```bash
 git clone git@github.com:DarjaBalasheva/Menu.git
 cd Menu
 ```
 
-### Настройка env файла
-В качестве примера уже присутсвует файл .env.deploy для запуска докеров. Дополнительной настройки не требуется
+### Setting env file
+Project is having .env.deploy file for example. Change to your values.
 
-## Запуск проекта
-Запустите Docker-контейнеры с помощью docker-compose. Это может занять некоторе время. Дождитесь, пока в консоле не появится соотвествующая информация о готовности работы БД и fastapi. Docker-compose настроен таким образом, что тесты будут запускаться сразу после поднятия fastapi.
+## Start project
+Run docker-compose. It can take some time. Docker-compose is configuring in such a way that tests will be launched immediately after fastapi is raised.
 
 ```bash
 docker-compose up
 ```
 
-или
+or
 
 ```bash
 docker-compose up -d
 ```
-
-Вы также можете отдельно запустить тесты использовав команду
+To run tests separately
 
 ```bash
 docker-compose up tests15
 ```
 
-## Лицензия
-Этот проект лицензирован по лицензии MIT.
+## License
+This priject are using license MIT.
