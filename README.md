@@ -11,7 +11,7 @@ FastAPI is using asyng CRUD endpoint.
 #### Docker:
 Project is using Docker
 #### Data Base:
-Project is using DB MySQL and sqlAlchemy for creating DB and connecting to DB.
+Project is using DB PostgreSQL and sqlAlchemy for creating DB and connecting to DB.
 Tables are creating for saving information. Primary and foreign keys are using in tables.
 Unique values are creating to avoid dublicates.
 #### Pipfile:
