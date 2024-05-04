@@ -72,13 +72,13 @@ Project is having .env.deploy file for example. Change to your values.
 Run docker-compose. It can take some time. Docker-compose is configuring in such a way that tests will be launched immediately after fastapi is raised.
 
 ```bash
-docker-compose up
+docker-compose -f docker-compose-api.yaml up --build
 ```
 
-or
+or with pytests
 
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose-tests.yaml up --build
 ```
 To run tests separately
 
